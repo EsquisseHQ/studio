@@ -25,6 +25,8 @@ To verify the demo, run `pnpm build`, `pnpm exec playwright install chromium` an
 
 ## Help shape the studio
 
+Developers and coding agents are welcome. Browse [open tasks marked help wanted](https://github.com/EsquisseHQ/studio/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22), or [propose a feature](https://github.com/EsquisseHQ/studio/issues/new/choose). The [contribution guide](CONTRIBUTING.md) covers taking a task and getting your work reviewed. Coding agents can start with [AGENTS.md](AGENTS.md).
+
 Read [The Esquisse Manifesto](MANIFESTO.md) for the pricing and governance proposals. To suggest an integration, [open an issue](../../issues/new) describing what you want to create, which model you use, and what you need to know before paying for a generation. The founder maintains the official releases during this first phase.
 
 ## License
