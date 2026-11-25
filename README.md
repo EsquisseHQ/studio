@@ -1,3 +1,5 @@
+<p align="center"><img src="./esquisse-logo.png" alt="Esquisse" width="112"></p>
+
 # Esquisse
 
 Esquisse is a cooperative, open-source studio in development for generating images and video across multiple AI models. Before a creator starts a generation, they should be able to see what the provider charges, what the studio retains, and how much they will pay.
