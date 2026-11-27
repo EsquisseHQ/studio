@@ -3,10 +3,10 @@ import { readFile } from 'node:fs/promises'
 
 test('a creator can iterate, download the accepted quote and recover the rendered image', async ({ page }) => {
   await page.goto('/')
-  await page.getByText('4:5', { exact: true }).click()
+  await page.getByLabel('Format', { exact: true }).selectOption('4:5')
   await page.getByLabel('Description', { exact: true }).fill('Flacon ambré au flash direct')
-  await expect(page.locator('.total dd')).toContainText('0,06')
-  await page.getByRole('button', { name: 'Générer une variation' }).click()
+  await expect(page.getByLabel('Détail du prix')).toContainText('0,06')
+  await page.getByRole('button', { name: /Générer/ }).click()
   const png = page.getByRole('link', { name: 'Télécharger le PNG' })
   await expect(png).toBeVisible()
   const url = await png.getAttribute('href')
@@ -15,6 +15,8 @@ test('a creator can iterate, download the accepted quote and recover the rendere
   const bytes = await readFile((await (await download).path())!)
   expect(bytes.subarray(1, 4).toString()).toBe('PNG')
   expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([1024, 1280])
+  const openResult = page.getByRole('button', { name: 'Ouvrir Flacon ambré au flash direct' })
+  await openResult.click()
   const receiptDownload = page.waitForEvent('download')
   await page.getByRole('link', { name: 'Reçu JSON' }).click()
   const receipt = JSON.parse(await readFile((await (await receiptDownload).path())!, 'utf8'))
@@ -23,8 +25,34 @@ test('a creator can iterate, download the accepted quote and recover the rendere
   expect(url).toContain(receipt.quote.id)
   await page.reload()
   await expect(png).toHaveAttribute('href', url!)
-  await page.getByRole('button', { name: 'Reprendre les réglages' }).click()
+  await openResult.click()
+  await page.getByRole('button', { name: /Reprendre les réglages/ }).click()
   await expect(page.getByLabel('Description', { exact: true })).toHaveValue(receipt.prompt)
+})
+
+test('the mobile Image menu opens tools and models and earlier renders stay in the gallery', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Image', exact: true }).click()
+  await page.getByRole('button', { name: /Explorer les exemples/ }).click()
+  await page.getByRole('button', { name: 'Ouvrir Chrome liquide' }).click()
+  await page.getByRole('button', { name: /Utiliser le prompt/ }).click()
+  await expect(page.getByLabel('Description')).toHaveValue(/ruban de chrome/)
+  for (const prompt of ['Premier essai', 'Deuxième essai']) {
+    await page.getByLabel('Description').fill(prompt)
+    await page.getByRole('button', { name: /Générer/ }).click()
+    await expect(page.getByRole('button', { name: 'Ouvrir ' + prompt })).toBeVisible()
+  }
+  await page.reload()
+  await page.getByRole('button', { name: /Mes rendus/ }).click()
+  await expect(page.locator('.tile')).toHaveCount(2)
+  await expect(page.locator('.tile').first()).toContainText('Deuxième essai')
+  await page.getByRole('button', { name: 'Grille compacte' }).click()
+  await expect(page.getByRole('button', { name: 'Grille compacte' })).toHaveAttribute('aria-pressed', 'true')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.getByRole('button', { name: 'Image', exact: true }).click()
+  await page.getByRole('button', { name: /FLUX 1.1/ }).click()
+  await expect(page.getByLabel('Modèle', { exact: true })).toHaveValue('flux')
 })
 
 test('concurrent acceptances and later retries recover one receipt', async ({ request }) => {

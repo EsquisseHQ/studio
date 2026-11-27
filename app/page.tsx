@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { examplePrompt, fluxRate, formats, money, type Format, type Outcome, type Quote, type Receipt } from '../lib/types'
+import { examples, GalleryCard, ImageDetails, renderItem, type GalleryItem } from './gallery'
 
 const storageKey = 'esquisse.attempt.v1'
 type Saved = { quoteId: string; prompt: string; format: Format; model?: 'demo' | 'flux' }
@@ -11,8 +12,9 @@ async function post<T>(action: string, data: unknown): Promise<T> {
   if (!res.ok) throw new Error(body.error || 'Connexion interrompue.')
   return body
 }
-const asset = (kind: string, id: string, download = false) =>
-  '/api/studio/' + kind + '?id=' + encodeURIComponent(id) + (download ? '&download=1' : '')
+const historyPrefix = 'esquisse.gallery.v1.'
+type Filter = 'all' | 'mine' | 'examples'
+function recentFirst(a: Receipt, b: Receipt) { return b.createdAt.localeCompare(a.createdAt) }
 
 export default function Studio() {
   const [prompt, setPrompt] = useState(examplePrompt)
@@ -20,7 +22,14 @@ export default function Studio() {
   const [model, setModel] = useState<'demo' | 'flux'>('demo')
   const live = model === 'flux'
   const [quote, setQuote] = useState<Quote & { missingKey?: boolean }>()
-  const [receipt, setReceipt] = useState<Receipt>()
+  const [history, setHistory] = useState<Receipt[]>([])
+  const [filter, setFilter] = useState<Filter>('all')
+  const [dense, setDense] = useState(false)
+  const [detail, setDetail] = useState<GalleryItem>()
+  const [menu, setMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const menuButton = useRef<HTMLButtonElement>(null)
+  const pricePanel = useRef<HTMLDetailsElement>(null)
   const [reload, setReload] = useState(0)
   const [busy, setBusy] = useState(false)
   const [ready, setReady] = useState(false)
@@ -31,6 +40,36 @@ export default function Studio() {
   const lock = useRef(false)
   const input = useRef<HTMLTextAreaElement>(null)
 
+  function remember(result: Receipt) {
+    setHistory(items => [result, ...items.filter(r => r.id !== result.id)].sort(recentFirst))
+    try { localStorage.setItem(historyPrefix + result.id, JSON.stringify(result)) }
+    catch { setError('Stockage du navigateur plein. Télécharge le PNG pour conserver ce rendu.') }
+  }
+  useEffect(() => {
+    function sync() {
+      const items: Receipt[] = []
+      for (const key of Object.keys(localStorage)) {
+        if (!key.startsWith(historyPrefix)) continue
+        try {
+          const r = JSON.parse(localStorage.getItem(key) || 'null')
+          if (r?.id && r.quote && typeof r.prompt === 'string' && typeof r.createdAt === 'string') items.push(r)
+        } catch { continue }
+      }
+      setHistory(items.sort(recentFirst))
+    }
+    function onStorage(e: StorageEvent) { if (!e.key || e.key.startsWith(historyPrefix)) sync() }
+    try { sync() } catch { setError('Historique local indisponible.') }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+  useEffect(() => {
+    if (!menu) return
+    function outside(e: PointerEvent) { if (!menuRef.current?.contains(e.target as Node)) setMenu(false) }
+    function escape(e: KeyboardEvent) { if (e.key === 'Escape') { setMenu(false); menuButton.current?.focus() } }
+    document.addEventListener('pointerdown', outside)
+    document.addEventListener('keydown', escape)
+    return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape) }
+  }, [menu])
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey)
@@ -58,7 +97,7 @@ export default function Studio() {
           }
           if (result.state === 'pending') setRetryId(tracked)
         } else {
-          setReceipt(result); setProgress(''); setRetryId('')
+          remember(result); setProgress(''); setRetryId('')
         }
       } catch (err) {
         if (!active) return
@@ -83,6 +122,8 @@ export default function Studio() {
     if (lock.current || tracked || !price || price.missingKey || !prompt.trim()) return
     lock.current = true
     setBusy(true)
+    setFilter(f => f === 'examples' ? 'all' : f)
+    window.scrollTo({ top: 0 })
     setError('')
     setProgress(''); setRetryId('')
     const saved: Saved = { quoteId: price.id, prompt: prompt.trim(), format, model }
@@ -92,7 +133,7 @@ export default function Studio() {
       if ('state' in result) {
         setProgress(result.message)
         if (result.state === 'pending') setTracked(result.id)
-      } else { setReceipt(result) }
+      } else { remember(result) }
       setQuote(undefined)
       setReload(value => value + 1)
     } catch (err) { setError(err instanceof Error ? err.message : 'Essai interrompu.'); setRetryId(saved.quoteId) }
@@ -101,43 +142,84 @@ export default function Studio() {
   const price = quote?.format === format && (quote.rate === fluxRate) === live ? quote : undefined
   const running = busy || Boolean(tracked)
   const formatted = (cents: number) => money(cents, price?.currency)
-  const dims = receipt ? receipt.width + ' × ' + receipt.height : '1024 × 1024'
+  function chooseModel(next: 'demo' | 'flux') {
+    setModel(next); setMenu(false); setError(''); setProgress('')
+    if (next === 'flux') setFormat('1:1')
+  }
+  function navigate(next: Filter) {
+    setFilter(next); setMenu(false); window.scrollTo({ top: 0 })
+  }
+  const cards: GalleryItem[] = [
+    ...(filter === 'examples' ? [] : history.map(renderItem)),
+    ...(filter === 'mine' ? [] : examples)
+  ]
   return <>
-    <header><div className="bar"><a className="brand" href="/"><img src="/esquisse-logo.png" alt="" />Esquisse</a>
-      <span className="section">Studio Image</span><a className="source" href="https://github.com/EsquisseHQ/studio">GitHub ↗</a></div></header>
-    <main><div className="title"><div><p className="eyebrow">Atelier de création</p><h1>Studio Image</h1></div>
-      <span className="mode"><i />{live ? 'API Black Forest Labs' : 'Simulation locale'}</span></div>
-      <div className="workspace">
-        <section className="canvas"><div className="canvas-head"><h2>{receipt ? 'Dernier rendu' : 'Aperçu du studio'}</h2><span>{dims} px</span></div>
-          <div className="frame"><img className="photo" src={receipt ? asset('image', receipt.id) : '/atelier.webp'} alt={receipt ? receipt.prompt : 'Flacon de parfum ambré sur du travertin éclairé au soleil'} /></div>
-          <div className="caption"><div><span className="eyebrow">{receipt ? receipt.model : 'Exemple de départ'}</span><h3>{receipt ? (receipt.simulated ? 'Variation de lumière' : 'Image générée') : 'Étude de verre ambré'}</h3></div>
-            {receipt && <button className="text-button" disabled={running} onClick={() => { setPrompt(receipt.prompt); setFormat(receipt.quote.format); setModel(receipt.simulated ? 'demo' : 'flux'); input.current?.focus() }}>Reprendre les réglages ↗</button>}
+    <header className="mast"><div className="mast-inner">
+      <a className="brand" href="/" aria-label="Esquisse, accueil"><img src="/esquisse-logo.png" alt="" /><span>esquisse</span></a>
+      <nav aria-label="Navigation principale"><div className="nav-image" ref={menuRef}>
+        <button className="nav-current" ref={menuButton} aria-expanded={menu} aria-controls="image-menu"
+          onClick={() => setMenu(!menu)}>Image <span className="chevron" /></button>
+        {menu && <section id="image-menu" className="image-menu" aria-label="Menu Image">
+          <div className="menu-tiles">
+            <button onClick={() => { setMenu(false); input.current?.focus() }}><img src={examples[0].image} alt="" /><strong>Créer une image ↗</strong></button>
+            <button onClick={() => navigate('examples')}><img src={examples[1].image} alt="" /><strong>Explorer les exemples ↗</strong></button>
           </div>
-          {receipt && <div className="downloads"><a href={asset('image', receipt.id, true)} download>Télécharger le PNG ↓</a><a href={asset('receipt', receipt.id, true)} download>Reçu JSON ↓</a><span>Encaissé par Esquisse · {money(receipt.chargedCents, receipt.quote.currency)}</span></div>}
-        </section>
-        <form onSubmit={e => { e.preventDefault(); void run() }}>
-          <h2>Composer</h2><div className="model"><label htmlFor="model">Modèle</label><select id="model" value={model} disabled={running || !ready} onChange={e => {
-            const next = e.target.value === 'flux' ? 'flux' : 'demo'
-            setModel(next); setError(''); setProgress('')
-            if (next === 'flux') setFormat('1:1')
-          }}><option value="demo">Esquisse Démo</option><option value="flux">FLUX 1.1 [pro]</option></select></div>
-          <label htmlFor="prompt">Description</label><textarea ref={input} id="prompt" value={prompt} maxLength={2000} disabled={busy || !ready} onChange={e => setPrompt(e.target.value)} />
-          <p className="hint">{live ? 'Une image carrée de 1024 × 1024 à partir de ta description.' : 'La démo varie la lumière et le cadrage d’une photo témoin selon tes réglages.'}</p>
-          <fieldset disabled={running || !ready}><legend>Format</legend><div className="formats">{(live ? ['1:1'] as const : formats).map(f => <label key={f}><input type="radio" name="format" checked={format === f} onChange={() => setFormat(f)} /><span>{f}</span></label>)}</div></fieldset>
-          <div className="bill"><h3>{live ? 'Devis du prototype · USD' : 'Devis simulé'}</h3><dl>
-            <div><dt>{live ? 'BFL · coût fournisseur' : 'Fournisseur'}</dt><dd>{price ? formatted(price.providerCents) : '—'}</dd></div>
-            <div><dt>{live ? 'Commission test · non encaissée' : 'Commission Esquisse'}</dt><dd>{price ? formatted(price.studioCents) : '—'}</dd></div>
-            {!live && <div><dt>Taxes simulées</dt><dd>{price ? formatted(price.taxCents) : '—'}</dd></div>}
-            <div className="total"><dt>{live ? 'Total indicatif HT' : 'Total simulé'}</dt><dd>{price ? formatted(price.totalCents) : '—'}</dd></div>
-          </dl></div>
-          {error && <p className="error" role="alert">{error} <button type="button" className="text-button" onClick={() => { setError(''); setQuote(undefined); setReload(n => n + 1) }}>Actualiser le devis</button></p>}
-          {progress && <p role="status">{progress}</p>}
-          {retryId && !running && <button type="button" onClick={() => { setError(''); setTracked(retryId); setRetryId('') }}>Vérifier le dernier essai</button>}
-          {price?.missingKey && <p className="hint">Pour utiliser FLUX, configure BFL_API_KEY dans .env.local puis redémarre le studio.</p>}
-          <button className="generate" disabled={!price || price.missingKey || running || !prompt.trim()}>{running ? 'Essai en cours…' : live ? 'Générer · 0,04 USD chez BFL' : 'Générer une variation'} <span aria-hidden="true">↗</span></button>
-          <p className="footnote">{live ? 'Le compte associé à ta clé BFL finance cet essai. Esquisse encaisse 0 USD.' : 'Aucun paiement · Débit réel ' + money(0)}</p>
-          <span className="sr" role="status">{busy ? 'Simulation en cours' : receipt ? 'Image et reçu disponibles' : ''}</span>
-        </form>
+          <div className="menu-columns"><div><h2>Outils</h2>
+            <button onClick={() => navigate('mine')}>Galerie de rendus</button>
+            <button onClick={() => { setMenu(false); if (pricePanel.current) { pricePanel.current.open = true; pricePanel.current.querySelector('summary')?.focus() } }}>Détail du devis</button>
+          </div><div><h2>Modèles</h2>
+            <button disabled={running} onClick={() => chooseModel('demo')}>Esquisse Démo <small>Local · gratuit</small></button>
+            <button disabled={running} onClick={() => chooseModel('flux')}>FLUX 1.1 [pro] <small>API · 0,04 USD</small></button>
+          </div></div>
+        </section>}
+      </div><a href="https://github.com/EsquisseHQ/studio/discussions">Communauté ↗</a></nav>
+      <span className="local"><i />Studio local</span>
+    </div></header>
+    <main><div className="page-head"><h1>Studio <em>Image</em></h1>
+      <div className="view-switch" role="group" aria-label="Densité de la galerie">
+        <button aria-label="Grille confortable" title="Grille confortable" aria-pressed={!dense} onClick={() => setDense(false)}><i className="grid-icon" /></button>
+        <button aria-label="Grille compacte" title="Grille compacte" aria-pressed={dense} onClick={() => setDense(true)}><i className="grid-icon compact" /></button>
+      </div></div>
+      <div className="gallery-bar"><div className="filters" role="group" aria-label="Filtrer la galerie">
+        {([['all','Tout'],['mine','Mes rendus'],['examples','Exemples']] as const).map(([id,label]) =>
+          <button key={id} aria-pressed={filter === id} onClick={() => navigate(id)}>{label}{id === 'mine' && history.length > 0 && <span> {history.length}</span>}</button>)}
+      </div><span className="count">{cards.length} {cards.length === 1 ? 'image' : 'images'}</span></div>
+      <section className={'gallery' + (dense ? ' dense' : '')} aria-label="Galerie d’images">
+        {running && filter !== 'examples' && <div className="queue-tile" role="status"><i /><strong>Génération en cours</strong><span>{live ? 'FLUX 1.1 [pro]' : 'Esquisse Démo'}</span></div>}
+        {cards.map(item => <GalleryCard key={item.id} item={item} open={() => setDetail(item)} />)}
+      </section>
+      {!cards.length && !running && <div className="empty"><h2>Ton premier rendu apparaîtra ici.</h2><button onClick={() => input.current?.focus()}>Écrire un prompt ↗</button></div>}
+    </main>
+    <form className="dock" onSubmit={e => { e.preventDefault(); void run() }}>
+      <div className="prompt-row"><span className="spark" aria-hidden="true">✧</span><textarea ref={input} id="prompt" aria-label="Description"
+        value={prompt} maxLength={2000} disabled={running || !ready} onChange={e => setPrompt(e.target.value)}
+        placeholder="Décris l’image que tu veux créer…"/></div>
+      <div className="dock-tools"><div className="select-shell"><span aria-hidden="true">◈</span>
+        <select aria-label="Modèle" value={model} disabled={running || !ready} onChange={e => chooseModel(e.target.value === 'flux' ? 'flux' : 'demo')}>
+          <option value="demo">Esquisse Démo</option><option value="flux">FLUX 1.1 [pro]</option></select></div>
+        <div className="select-shell"><i className="ratio-icon" /><select aria-label="Format" value={format} disabled={running || !ready} onChange={e => setFormat(e.target.value as Format)}>
+          {(live ? ['1:1'] as const : formats).map(f => <option key={f}>{f}</option>)}</select></div>
+        <details ref={pricePanel} className="price"><summary aria-label="Détail du prix">Devis {price ? formatted(price.totalCents) : '…'} <span className="chevron" /></summary>
+          <div className="price-body"><strong>{live ? 'Devis indicatif HT · USD' : 'Devis simulé'}</strong>
+            <dl><div><dt>Fournisseur</dt><dd>{price ? formatted(price.providerCents) : '—'}</dd></div>
+              <div><dt>Commission {live ? 'test' : 'Esquisse'}</dt><dd>{price ? formatted(price.studioCents) : '—'}</dd></div>
+              {!live && <div><dt>Taxes simulées</dt><dd>{price ? formatted(price.taxCents) : '—'}</dd></div>}
+              <div className="total"><dt>Total {live ? 'indicatif HT' : 'simulé'}</dt><dd>{price ? formatted(price.totalCents) : '—'}</dd></div></dl>
+            <small>{live ? 'Ton compte BFL finance la génération. Esquisse encaisse 0 USD.' : 'Simulation sur la photo de parfum. Aucun débit.'}</small>
+          </div></details>
+        <button className="generate" disabled={!price || price.missingKey || running || !prompt.trim()}>
+          <span>{running ? 'En cours…' : 'Générer'}</span><b>{live ? '0,04 USD' : 'Gratuit'}</b><span aria-hidden="true">↗</span>
+        </button>
       </div>
-    </main></>
+      {error && <p className="notice" role="alert">{error} <button type="button" onClick={() => { setError(''); setQuote(undefined); setReload(n => n + 1) }}>Actualiser le devis</button></p>}
+      {progress && <p className="notice" role="status">{progress}</p>}
+      {retryId && !running && <button type="button" className="notice" onClick={() => { setError(''); setTracked(retryId); setRetryId('') }}>Vérifier le dernier essai</button>}
+      {price?.missingKey && <p className="notice">FLUX nécessite une clé BFL_API_KEY dans .env.local. Esquisse Démo est disponible gratuitement.</p>}
+    </form>
+    {detail && <ImageDetails item={detail} close={() => setDetail(undefined)} running={running} reuse={() => {
+      const r = detail.receipt
+      if (r) { chooseModel(r.simulated ? 'demo' : 'flux'); setFormat(r.quote.format) }
+      setPrompt(detail.prompt); setDetail(undefined); requestAnimationFrame(() => input.current?.focus())
+    }} />}
+  </>
 }
