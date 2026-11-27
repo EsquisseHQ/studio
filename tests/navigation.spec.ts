@@ -1,5 +1,20 @@
 import { expect, test } from '@playwright/test'
 
+test('header actions open pricing, saved renders and a persistent browser profile', async ({page}) => {
+  await page.setViewportSize({width: 320, height: 800})
+  await page.goto('/')
+  await page.getByRole('link', {name: 'Upgrade'}).click()
+  await expect(page).toHaveURL(/\/pricing$/)
+  await page.getByRole('link', {name: 'My renders'}).click()
+  await expect(page.getByRole('button', {name: 'My renders'})).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', {name: 'Account'}).click()
+  await page.getByLabel('Display name').fill('Lou')
+  await page.getByRole('button', {name: 'Save profile'}).click()
+  await page.reload()
+  await expect(page.getByRole('button', {name: 'Account'})).toHaveText('L')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
 test('the home page explains the quote and opens the image studio', async ({page}) => {
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('lang', 'en')

@@ -69,7 +69,9 @@ export default function Studio() {
         setModel(saved.model || 'demo'); setFormat(saved.format); setPrompt(saved.prompt); setTracked(saved.quoteId)
       }
     } catch { setError('Local storage is unavailable.') }
-    const requested = new URLSearchParams(window.location.search).get('model')
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('view') === 'mine') setFilter('mine')
+    const requested = params.get('model')
     if (requested === 'demo' || requested === 'flux') {
       setModel(requested)
       if (requested === 'flux') setFormat('1:1')

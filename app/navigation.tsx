@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { mediaNames, studies } from '../lib/catalog'
+import { HeaderActions } from './header-actions'
 
 const sections = [
   ['/', 'Home'], ['/image', 'Image'], ['/video', 'Video'], ['/audio', 'Audio'], ['/models', 'Models'],
@@ -53,6 +54,6 @@ export function Navigation({imageMenu}: {imageMenu?: (close: () => void) => Reac
         </div>
       })}
       <a className="community" href="https://github.com/EsquisseHQ/studio/discussions">Community ↗</a>
-    </nav><span className="local"><i />Local studio</span>
+    </nav><HeaderActions />
   </div></header>
 }

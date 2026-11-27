@@ -29,8 +29,8 @@ a:hover { text-decoration: underline }
 .nav-image { position: relative }
 .nav-current { display: flex; gap: 12px; align-items: center; background: #332a3f; border: 1px solid #493953; border-radius: 8px; padding: 7px 13px }
 .chevron { width: 6px; height: 6px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); display: inline-block; vertical-align: 3px }
-.local { margin-left: auto; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; font-size: 12px }
-.local i { width: 6px; height: 6px; border-radius: 50%; background: #a186ba }
+
+
 main { padding: 0 var(--gutter) 230px; min-height: calc(100dvh - 61px); background: var(--bg) }
 .page-head,.gallery-bar { display: flex; align-items: center; justify-content: space-between }
 .page-head { padding: clamp(17px,2.3vw,36px) 0 13px }
@@ -89,7 +89,7 @@ dl { padding: 9px 0 }dl div { display: flex; justify-content: space-between; gap
 @media(min-width:1650px){.gallery{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:920px){.gallery{grid-template-columns:repeat(3,minmax(0,1fr))}.gallery.dense{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:620px){
-  .mast-inner{gap:14px;height:53px}.brand{font-size:20px;gap:4px}.brand img{width:28px;height:28px}.mast nav{gap:9px}.mast nav>a{font-size:12px}.local{font-size:0;gap:0}
+  .mast-inner{gap:14px;height:53px}.brand{font-size:20px;gap:4px}.brand img{width:28px;height:28px}.mast nav{gap:9px}.mast nav>a{font-size:12px}
   .image-menu{position:fixed;inset:51px 10px auto;width:auto}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.gallery.dense{grid-template-columns:repeat(3,minmax(0,1fr))}
   .tile{border-radius:6px}.tile-caption{padding:22px 8px 7px}.tile-caption strong{font-size:13px}.tile-caption small{font-size:9px}
   .dock{width:calc(100% - 18px);bottom:max(9px,env(safe-area-inset-bottom));padding:9px;border-radius:13px}.prompt-row{padding:0 0 5px;gap:5px}textarea{font-size:16px;height:46px}.dock-tools{gap:4px}.generate{font-size:13px;min-height:33px}.select-shell,.price summary{padding:4px;font-size:11px}
