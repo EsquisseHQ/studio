@@ -1,0 +1,80 @@
+import { expect, test } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+
+test('a creator can iterate, download the accepted quote and recover the rendered image', async ({ page }) => {
+  await page.goto('/image')
+  await page.getByLabel('Format', { exact: true }).selectOption('4:5')
+  await page.getByLabel('Description', { exact: true }).fill('Amber bottle in direct flash')
+  await expect(page.getByLabel('Price breakdown')).toContainText('0.06')
+  await page.getByRole('button', { name: /Generate/ }).click()
+  const png = page.getByRole('link', { name: 'Download PNG' })
+  await expect(png).toBeVisible()
+  const url = await png.getAttribute('href')
+  const download = page.waitForEvent('download')
+  await png.click()
+  const bytes = await readFile((await (await download).path())!)
+  expect(bytes.subarray(1, 4).toString()).toBe('PNG')
+  expect([bytes.readUInt32BE(16), bytes.readUInt32BE(20)]).toEqual([1024, 1280])
+  const openResult = page.getByRole('button', { name: 'Open Amber bottle in direct flash' })
+  await openResult.click()
+  const receiptDownload = page.waitForEvent('download')
+  await page.getByRole('link', { name: 'JSON receipt' }).click()
+  const receipt = JSON.parse(await readFile((await (await receiptDownload).path())!, 'utf8'))
+  expect(receipt.quote.totalCents).toBe(6)
+  expect(receipt.chargedCents).toBe(0)
+  expect(url).toContain(receipt.quote.id)
+  await page.reload()
+  await expect(png).toHaveAttribute('href', url!)
+  await openResult.click()
+  await page.getByRole('button', { name: /Reuse settings/ }).click()
+  await expect(page.getByLabel('Description', { exact: true })).toHaveValue(receipt.prompt)
+})
+
+test('the mobile Image menu opens tools and models and earlier renders stay in the gallery', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/image')
+  await page.getByRole('button', { name: 'Image', exact: true }).click()
+  await page.getByRole('button', { name: /Browse examples/ }).click()
+  await page.getByRole('button', { name: 'Open Liquid Chrome' }).click()
+  await page.getByRole('button', { name: /Use this prompt/ }).click()
+  await expect(page.getByLabel('Description')).toHaveValue(/ribbon of chrome/)
+  for (const prompt of ['First render', 'Second render']) {
+    await page.getByLabel('Description').fill(prompt)
+    await page.getByRole('button', { name: /Generate/ }).click()
+    await expect(page.getByRole('button', { name: 'Open ' + prompt })).toBeVisible()
+  }
+  await page.reload()
+  await page.getByRole('button', { name: /My renders/ }).click()
+  await expect(page.locator('.tile')).toHaveCount(2)
+  await expect(page.locator('.tile').first()).toContainText('Second render')
+  await page.getByRole('button', { name: 'Compact grid' }).click()
+  await expect(page.getByRole('button', { name: 'Compact grid' })).toHaveAttribute('aria-pressed', 'true')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.getByRole('button', { name: 'Image', exact: true }).click()
+  await page.getByRole('button', { name: /FLUX 1.1/ }).click()
+  await expect(page.getByLabel('Model', { exact: true })).toHaveValue('flux')
+})
+
+test('concurrent acceptances and later retries recover one receipt', async ({ request }) => {
+  const quote = await (await request.post('/api/studio/quote', { data: { format: '1:1' } })).json()
+  const data = { quoteId: quote.id, prompt: 'Amber Glass' }
+  const submit = () => request.post('/api/studio/generate', { data })
+  const responses = await Promise.all([submit(), submit()])
+  for (const response of responses) expect(response.status()).toBe(200)
+  const [first, second] = await Promise.all(responses.map(res => res.json()))
+  expect(second).toEqual(first)
+  expect(first.quote).toEqual(quote)
+  expect(await (await submit()).json()).toEqual(first)
+  expect((await request.post('/api/studio/generate', { data: { ...data, prompt: 'Another attempt' } })).status()).toBe(409)
+})
+
+test('only a supported format and an existing server quote can generate a result', async ({ request }) => {
+  expect((await request.post('/api/studio/quote', { data: { format: '8K' } })).status()).toBe(400)
+  const quote = await (await request.post('/api/studio/quote', {
+    data: { format: '1:1', totalCents: 1, studioCents: 0 }
+  })).json()
+  expect(quote.totalCents).toBe(5)
+  expect(quote.studioCents).toBe(1)
+  expect((await request.post('/api/studio/generate', { data: { quoteId: quote.id, prompt: '  ' } })).status()).toBe(400)
+  expect((await request.get('/api/studio/receipt?id=' + quote.id)).status()).toBe(404)
+})

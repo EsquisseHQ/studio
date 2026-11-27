@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: esquisse-studio
+    runtime: node
+    plan: free
+    branch: prototype/image-studio
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm build
+    startCommand: node node_modules/next/dist/bin/next start --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    domains:
+      - esquisse.top
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: ESQUISSE_PUBLIC_ORIGIN
+        value: https://esquisse.top

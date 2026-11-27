@@ -1,0 +1,3 @@
+packages:
+  - '.'
+fetchTimeout: 600000

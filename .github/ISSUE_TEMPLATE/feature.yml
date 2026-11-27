@@ -1,0 +1,22 @@
+name: Feature idea or task
+description: Suggest a feature or describe work a contributor can pick up.
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Who needs this and what should they be able to do?
+      placeholder: After a render, a creator can copy the prompt that produced it.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How can a reviewer verify it?
+      placeholder: Edit the composer after rendering. Copy the prompt from the result and paste it elsewhere. The pasted text matches the original render.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Starting points and scope
+      description: Optional. Link a relevant screen, file, roadmap milestone or prior discussion. Mention any parts that can wait.
