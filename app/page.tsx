@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { examplePrompt, fluxRate, formats, money, type Format, type Outcome, type Quote, type Receipt } from '../lib/types'
+import { Navigation } from './navigation'
+import { fluxPrice } from '../lib/catalog'
 import { examples, GalleryCard, ImageDetails, renderItem, type GalleryItem } from './gallery'
 
 const storageKey = 'esquisse.attempt.v1'
@@ -26,9 +28,6 @@ export default function Studio() {
   const [filter, setFilter] = useState<Filter>('all')
   const [dense, setDense] = useState(false)
   const [detail, setDetail] = useState<GalleryItem>()
-  const [menu, setMenu] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const menuButton = useRef<HTMLButtonElement>(null)
   const pricePanel = useRef<HTMLDetailsElement>(null)
   const [reload, setReload] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -63,14 +62,6 @@ export default function Studio() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
   useEffect(() => {
-    if (!menu) return
-    function outside(e: PointerEvent) { if (!menuRef.current?.contains(e.target as Node)) setMenu(false) }
-    function escape(e: KeyboardEvent) { if (e.key === 'Escape') { setMenu(false); menuButton.current?.focus() } }
-    document.addEventListener('pointerdown', outside)
-    document.addEventListener('keydown', escape)
-    return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape) }
-  }, [menu])
-  useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey)
       if (raw) {
@@ -78,6 +69,11 @@ export default function Studio() {
         setModel(saved.model || 'demo'); setFormat(saved.format); setPrompt(saved.prompt); setTracked(saved.quoteId)
       }
     } catch { setError('La sauvegarde locale est indisponible.') }
+    const requested = new URLSearchParams(window.location.search).get('model')
+    if (requested === 'demo' || requested === 'flux') {
+      setModel(requested)
+      if (requested === 'flux') setFormat('1:1')
+    }
     setReady(true)
   }, [])
   useEffect(() => {
@@ -143,38 +139,30 @@ export default function Studio() {
   const running = busy || Boolean(tracked)
   const formatted = (cents: number) => money(cents, price?.currency)
   function chooseModel(next: 'demo' | 'flux') {
-    setModel(next); setMenu(false); setError(''); setProgress('')
+    setModel(next); setError(''); setProgress('')
     if (next === 'flux') setFormat('1:1')
   }
   function navigate(next: Filter) {
-    setFilter(next); setMenu(false); window.scrollTo({ top: 0 })
+    setFilter(next); window.scrollTo({ top: 0 })
   }
   const cards: GalleryItem[] = [
     ...(filter === 'examples' ? [] : history.map(renderItem)),
     ...(filter === 'mine' ? [] : examples)
   ]
   return <>
-    <header className="mast"><div className="mast-inner">
-      <a className="brand" href="/" aria-label="Esquisse, accueil"><img src="/esquisse-logo.png" alt="" /><span>esquisse</span></a>
-      <nav aria-label="Navigation principale"><div className="nav-image" ref={menuRef}>
-        <button className="nav-current" ref={menuButton} aria-expanded={menu} aria-controls="image-menu"
-          onClick={() => setMenu(!menu)}>Image <span className="chevron" /></button>
-        {menu && <section id="image-menu" className="image-menu" aria-label="Menu Image">
+    <Navigation imageMenu={close => <>
           <div className="menu-tiles">
-            <button onClick={() => { setMenu(false); input.current?.focus() }}><img src={examples[0].image} alt="" /><strong>Créer une image ↗</strong></button>
-            <button onClick={() => navigate('examples')}><img src={examples[1].image} alt="" /><strong>Explorer les exemples ↗</strong></button>
+            <button onClick={() => { close(); input.current?.focus() }}><img src={examples[0].image} alt="" /><strong>Créer une image ↗</strong></button>
+            <button onClick={() => { close(); navigate('examples') }}><img src={examples[1].image} alt="" /><strong>Explorer les exemples ↗</strong></button>
           </div>
           <div className="menu-columns"><div><h2>Outils</h2>
-            <button onClick={() => navigate('mine')}>Galerie de rendus</button>
-            <button onClick={() => { setMenu(false); if (pricePanel.current) { pricePanel.current.open = true; pricePanel.current.querySelector('summary')?.focus() } }}>Détail du devis</button>
+            <button onClick={() => { close(); navigate('mine') }}>Galerie de rendus</button>
+            <button onClick={() => { close(); if (pricePanel.current) { pricePanel.current.open = true; pricePanel.current.querySelector('summary')?.focus() } }}>Détail du devis</button>
           </div><div><h2>Modèles</h2>
-            <button disabled={running} onClick={() => chooseModel('demo')}>Esquisse Démo <small>Local · gratuit</small></button>
-            <button disabled={running} onClick={() => chooseModel('flux')}>FLUX 1.1 [pro] <small>API · 0,04 USD</small></button>
+            <button disabled={running} onClick={() => { close(); chooseModel('demo') } }>Esquisse Démo <small>Local · gratuit</small></button>
+            <button disabled={running} onClick={() => { close(); chooseModel('flux') } }>FLUX 1.1 [pro] <small>API · {fluxPrice}</small></button>
           </div></div>
-        </section>}
-      </div><a href="https://github.com/EsquisseHQ/studio/discussions">Communauté ↗</a></nav>
-      <span className="local"><i />Studio local</span>
-    </div></header>
+    </>} />
     <main><div className="page-head"><h1>Studio <em>Image</em></h1>
       <div className="view-switch" role="group" aria-label="Densité de la galerie">
         <button aria-label="Grille confortable" title="Grille confortable" aria-pressed={!dense} onClick={() => setDense(false)}><i className="grid-icon" /></button>
@@ -208,7 +196,7 @@ export default function Studio() {
             <small>{live ? 'Ton compte BFL finance la génération. Esquisse encaisse 0 USD.' : 'Simulation sur la photo de parfum. Aucun débit.'}</small>
           </div></details>
         <button className="generate" disabled={!price || price.missingKey || running || !prompt.trim()}>
-          <span>{running ? 'En cours…' : 'Générer'}</span><b>{live ? '0,04 USD' : 'Gratuit'}</b><span aria-hidden="true">↗</span>
+          <span>{running ? 'En cours…' : 'Générer'}</span><b>{live ? fluxPrice : 'Gratuit'}</b><span aria-hidden="true">↗</span>
         </button>
       </div>
       {error && <p className="notice" role="alert">{error} <button type="button" onClick={() => { setError(''); setQuote(undefined); setReload(n => n + 1) }}>Actualiser le devis</button></p>}

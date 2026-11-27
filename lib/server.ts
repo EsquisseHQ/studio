@@ -4,6 +4,7 @@ import path from 'node:path'
 import { createHash, randomUUID } from 'node:crypto'
 import sharp from 'sharp'
 import { fluxRate, type AttemptStatus, type Format, type Quote, type Receipt } from './types'
+import { fluxProviderCents, trialFeeCents } from './catalog'
 import { pollFlux, submitFlux } from './bfl'
 
 const local = globalThis as typeof globalThis & { esquisseDb?: DatabaseSync }
@@ -34,8 +35,8 @@ export class StudioError extends Error {
 export function quoteFor(format: Format, model: 'demo' | 'flux' = 'demo'): Quote {
   const live = model === 'flux'
   if (live && format !== '1:1') throw new StudioError(400, 'Le test FLUX utilise le format carré 1024 × 1024.')
-  const providerCents = live ? 4 : settings[format].providerCents
-  const studioCents = 1
+  const providerCents = live ? fluxProviderCents : settings[format].providerCents
+  const studioCents = trialFeeCents
   const quote: Quote = { id: randomUUID(), format, rate: live ? fluxRate : 'demo-v1', currency: live ? 'USD' : 'EUR', providerCents,
     studioCents, taxCents: 0, totalCents: providerCents + studioCents, expiresAt: new Date(Date.now() + 900_000).toISOString() }
   db().prepare('INSERT INTO quotes VALUES (?, ?)').run(quote.id, JSON.stringify(quote))
