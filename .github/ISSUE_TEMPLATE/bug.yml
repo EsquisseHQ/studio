@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a broken workflow, an accessibility barrier or an unexpected result.
+body:
+  - type: markdown
+    attributes:
+      value: "This report will be public. Remove personal data and keys. For a security flaw, [report privately](https://github.com/EsquisseHQ/studio/security/advisories/new)."
+  - type: textarea
+    id: steps
+    attributes:
+      label: What were you trying to do?
+      description: Include the page and the steps you took.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened, and what did you expect?
+      placeholder: I could read the quote with my screen reader, but I couldn't find the receipt after generation.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Where did this happen?
+      description: If known, include the hosted or local version, browser, device or assistive technology.
