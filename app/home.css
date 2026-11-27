@@ -1,24 +1,91 @@
-.home { max-width: 1640px; margin: auto; padding: 18px var(--gutter) 64px }
-.home-hero { position: relative; isolation: isolate; overflow: hidden; display: grid; place-items: center; min-height: clamp(460px,63dvh,690px); padding: 56px 22px; border: 1px solid #353035; border-radius: 24px; background: #080809 }
-.home-hero::before { content: ''; position: absolute; z-index: -2; inset: -8%; background: url('/studies/chrome.webp') right 40% / cover; filter: grayscale(1) blur(14px); opacity: .55 }
-.home-hero::after { content: ''; position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 90% 4%,#693e8c99,transparent 52%),radial-gradient(ellipse at 3% 115%,#50365d88,transparent 34%),linear-gradient(105deg,#080808bc,#080808d9 45%,#08080880 72%,transparent) }
-.hero-copy { text-align: center; max-width: 880px }
-.source-pill { display: inline-flex; padding: 6px 12px; border: 1px solid #544958; border-radius: 30px; background: #18131be0; color: #ede8ef; font-size: 12px }
-.hero-copy h1 { margin: 21px 0 15px; font-size: clamp(49px,6.1vw,98px); font-weight: 550; line-height: .99; letter-spacing: -.065em; color: #fafafa }
-.hero-copy p { max-width: 58ch; margin: auto; color: #d2cfd5; text-wrap: pretty; line-height: 1.6 }
-.home-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; margin-top: 25px }
-.home-actions a { padding: 10px 19px; border-radius: 24px; font-size: 14px; font-weight: 600 }
-.home-actions a:last-child { background: #18181bcc; border: 1px solid #4c474f }
-.home-quote { scroll-margin-top: 92px; display: grid; grid-template-columns: 1.3fr 1fr; align-items: center; gap: clamp(28px,8vw,140px); margin: 26px 0 42px; padding: clamp(22px,3vw,48px); background: #111; border: 1px solid #303030; border-radius: 17px }
-.home-quote small,.home-studios small { font-size: 12px; color: #cec5d3 }
-.home h2 { font-size: clamp(26px,2.6vw,42px); font-weight: 540; letter-spacing: -.055em }
-.home-quote p { margin: 7px 0 11px; max-width: 57ch; color: var(--muted) }
-.home-quote dl { margin: 0; font-size: 15px; font-variant-numeric: tabular-nums }.home-quote dl div { padding: 9px 0 }.home-quote dd { white-space: nowrap }
-.home-quote .total { font-weight: 650 }.home-quote .total dt { color: #f7f3f9 }
-.home-section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 15px }
-.home-studios { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px }
-.home-studios a { position: relative; overflow: hidden; border-radius: 14px; background: var(--panel); min-height: 164px; aspect-ratio: 2 }
-.home-studios img { width: 100%; height: 100%; object-fit: cover }
-.home-studios span { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 19px; background: linear-gradient(transparent,#070707ce) }
-.home-studios strong { font-size: 25px; letter-spacing: -.04em }
-@media(max-width:700px){.home{padding-top:12px}.home-hero{border-radius:16px}.home-quote{grid-template-columns:1fr;gap:12px}.home-studios{grid-template-columns:1fr}.home-studios a{aspect-ratio:2.6;min-height:115px}}
+.home {
+  max-width: 1720px;
+  margin: auto;
+  padding: 10px var(--gutter) clamp(44px,6vw,96px);
+}
+.mast:has(+ .home) { background: #080808; border-bottom: 0 }
+@media (min-width: 1060px) {
+  .mast:has(+ .home) .mast-inner { height: 74px; display: grid; grid-template-columns: 1fr auto 1fr }
+  .mast:has(+ .home) .brand { justify-self: start }
+  .mast:has(+ .home) nav { height: auto; padding: 3px; background: #141414; border: 1px solid #2a292d; border-radius: 24px }
+  .mast:has(+ .home) .nav-item { border-radius: 18px }
+}
+.home-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: clamp(550px, calc(93svh - 74px), 900px);
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  border-radius: clamp(18px,2vw,34px);
+  border: 1px solid #302a35;
+  background:
+    radial-gradient(ellipse at 93% -14%,#33283d 0%,transparent 46%),
+    radial-gradient(ellipse at 0% 100%,#24192d 0%,transparent 42%),#09090b;
+}
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  transform: translateY(-18%);
+  max-width: 900px;
+  padding: 0 14px;
+  text-align: center;
+}
+.hero-copy h1 { font-size: clamp(54px,6.4vw,104px); line-height: .96; letter-spacing: -.07em; font-weight: 520; color: #faf9fb }
+.hero-copy h1 span { color: #d4cfd9 }
+.hero-copy p { margin: 22px auto; font-size: clamp(14px,1.2vw,18px); color: #c1bbc6; text-wrap: balance }
+.hero-open {
+  display: inline-flex; align-items: center; gap: 16px; padding: 12px 21px;
+  border-radius: 30px; background: #f3edf7; color: #17101b; font-size: 14px; font-weight: 650;
+  box-shadow: 0 0 0 1px #ffffff42,0 6px 22px #0006;
+}
+.hero-open:hover { background: #e3c6f5; text-decoration: none }
+.glass-form {
+  position: absolute; pointer-events: none; top: 68%; left: 50%; transform: translateX(-50%);
+  width: clamp(700px,90%,1560px); aspect-ratio: 1600/570;
+}
+.glass-form img { display: block; width: 100%; height: 100% }
+.glass-form::after {
+  content: ''; position: absolute; inset: 0;
+  mask: url('/esquisse-glass.webp') center / 100% 100% no-repeat;
+  background: linear-gradient(105deg,transparent 28%,#ab6dff08 43%,#ab83ff35 49%,#aa72ff09 54%,transparent 65%) 0% 50% / 210% 100%;
+  mix-blend-mode: screen; animation: glass-reflection 14s ease-in-out infinite alternate;
+}
+@keyframes glass-reflection { to { background-position: 100% 50% } }
+@media (prefers-reduced-motion:reduce) { .glass-form::after { animation: none; background-position: 50% 50% } }
+.studio-shelf { padding-top: clamp(32px,5vw,74px) }
+.home-section-head,.quote-head,.quote-foot { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px }
+.home-section-head { margin-bottom: 18px }
+.home-section-head h2 { font-weight: 520; font-size: clamp(27px,3vw,48px); letter-spacing: -.055em }
+.home-studios { display: grid; grid-template-columns: 1.22fr 1fr 1fr; gap: clamp(10px,1.4vw,23px) }
+.home-studios article { min-width: 0 }
+.studio-cover {
+  position: relative; display: block; height: clamp(210px,23vw,355px); isolation: isolate;
+  overflow: hidden; background: #171518; color: white; border-radius: 13px;
+}
+.studio-cover img { position: absolute; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease }
+.studio-cover:hover img { transform: scale(1.035) }
+.studio-cover::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 42%,#0b080ecc 100%) }
+.cover-label { position: absolute; bottom: 16px; left: 20px; display: grid; gap: 2px }
+.cover-label small { color: #e4dce9; font-size: 12px }.cover-label strong { font-size: clamp(25px,3vw,44px); font-weight: 520; line-height: 1; letter-spacing: -.055em }
+.cover-arrow { position: absolute; bottom: 18px; right: 18px; font-size: 22px }
+.sample-quote { scroll-margin-top: 100px; margin-top: 12px; padding: 18px 20px; border: 1px solid #353036; border-radius: 12px; background: #131214 }
+.quote-head h3 { font-size: 17px; font-weight: 600; letter-spacing: -.03em }
+.quote-head small,.quote-foot small { color: var(--muted); font-size: 12px }
+.sample-quote dl { margin: 9px 0; padding: 0; font-size: 14px; font-variant-numeric: tabular-nums }
+.sample-quote dd { white-space: nowrap }
+.quote-total { border-top: 1px solid #3c333f; margin-top: 5px; font-weight: 650 }
+.quote-total dt { color: #f4edf9 }
+.quote-foot a { color: #d9bcea; font-size: 12px }
+@media(max-width:720px) {
+  .home { padding-top: 6px }
+  .home-hero { height: clamp(440px,75svh,640px) }
+  .hero-copy h1 { font-size: clamp(43px,10vw,70px) }
+  .hero-copy p { max-width: 29ch }
+  .glass-form { top: 74%; min-width: 0; width: 150% }
+  .home-studios { grid-template-columns: 1fr; gap: 22px }
+  .studio-cover { height: auto; aspect-ratio: 1.85 }
+  .sample-quote { padding: 15px }
+}

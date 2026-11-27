@@ -22,26 +22,34 @@ export default async function Home({searchParams}: {searchParams: Promise<{model
   return <><Navigation /><main className="home">
     <section className="home-hero" aria-labelledby="home-title">
       <div className="hero-copy">
-        <a className="source-pill" href="https://github.com/EsquisseHQ/studio">Open-source studio ↗</a>
-        <h1 id="home-title">Know the price<br />before you create.</h1>
-        <p>See the provider cost and Esquisse fee before you generate an image. Download an itemized receipt when your render is ready.</p>
-        <div className="home-actions"><a className="primary-light" href="/image">Open the studio ↗</a><a href="#devis">See a sample quote ↓</a></div>
+        <h1 id="home-title">Know the price<br /><span>before you create.</span></h1>
+        <p>See the model cost and studio fee before you generate.</p>
+        <a className="hero-open" href="/image">Open Studio <span aria-hidden="true">↗</span></a>
       </div>
+      <div className="glass-form" aria-hidden="true"><img src="/esquisse-glass.webp" alt="" fetchPriority="high" /></div>
     </section>
-    <section id="devis" className="home-quote" aria-labelledby="quote-title">
-      <div><small>Sample quote · FLUX 1.1 [pro]</small><h2 id="quote-title">Where does your money go?</h2>
-        <p>Black Forest Labs’ estimated price for one square image is {money(fluxProviderCents, 'USD')}. The studio fee is simulated in this prototype. Esquisse collects {money(0, 'USD')}.</p>
-        <a className="quiet-link" href="/pricing">View pricing ↗</a>
-      </div>
-      <dl>
-        <div><dt>Estimated provider cost</dt><dd>{money(fluxProviderCents, 'USD')}</dd></div>
-        <div><dt>Simulated studio fee</dt><dd>{money(trialFeeCents, 'USD')}</dd></div>
-        <div className="total"><dt>Estimated total before tax</dt><dd>{money(fluxProviderCents + trialFeeCents, 'USD')}</dd></div>
-      </dl>
-    </section>
-    <section aria-labelledby="studios-title"><div className="home-section-head"><h2 id="studios-title">Explore the studios</h2><a className="quiet-link" href="/models">Compare models ↗</a></div>
-      <div className="home-studios">{studios.map(s => <a key={s.href} href={s.href}><img src={'/studies/' + s.image + '.webp'} alt="" loading="lazy" />
-        <span><small>{s.action}</small><strong>{s.name} ↗</strong></span></a>)}</div>
+
+    <section className="studio-shelf" aria-labelledby="studios-title">
+      <div className="home-section-head"><h2 id="studios-title">Explore the studios</h2>
+        <a className="quiet-link" href="/models">Compare models ↗</a></div>
+      <div className="home-studios">{studios.map(s =>
+        <article key={s.href}>
+          <a className="studio-cover" href={s.href}>
+            <img src={'/studies/' + s.image + '.webp'} alt="" loading="lazy" />
+            <span className="cover-label"><small>{s.action}</small><strong>{s.name}</strong></span>
+            <span className="cover-arrow" aria-hidden="true">↗</span>
+          </a>
+          {s.href === '/image' && <section id="devis" className="sample-quote" aria-labelledby="quote-title">
+            <div className="quote-head"><h3 id="quote-title">Sample quote</h3><small>FLUX 1.1 [pro] · 1 image</small></div>
+            <dl>
+              <div><dt>Estimated provider cost</dt><dd>{money(fluxProviderCents, 'USD')}</dd></div>
+              <div><dt>Simulated studio fee</dt><dd>{money(trialFeeCents, 'USD')}</dd></div>
+              <div className="quote-total"><dt>Estimated total before tax</dt><dd>{money(fluxProviderCents + trialFeeCents, 'USD')}</dd></div>
+            </dl>
+            <div className="quote-foot"><small>Esquisse collects {money(0, 'USD')} in this prototype.</small><a href="/pricing">Pricing ↗</a></div>
+          </section>}
+        </article>
+      )}</div>
     </section>
   </main></>
 }
