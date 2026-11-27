@@ -25,6 +25,16 @@ Start with a product photographer making a square packshot. Give them an editabl
 
 ## Tracking progress
 
+### 27 November 2026 · First provider for the local trial
+
+The production build and all three simulator tests passed again. The prototype remains on the local `prototype/image-studio` branch. [Issue #1](https://github.com/EsquisseHQ/studio/issues/1) stays open until a reviewer downloads a real image and reconciles its receipt.
+
+Use Black Forest Labs' FLUX 1.1 [pro] for the first integration trial. The starting shot is one 1024 × 1024 text-to-image perfume packshot. Its fixed per-image rate makes the quote easy to check. BFL lists this as a previous-generation model, so the trial selects it for predictable billing and makes no claim about which model the wider catalog should feature. [Provider pricing](https://bfl.ai/pricing) · [Model API](https://docs.bfl.ai/flux_models/flux_1_1_pro)
+
+**Worked quote in USD.** One image at the published rate of $0.04 plus an illustrative $0.01 studio fee gives $0.05 before tax. Two separate attempts at the same rate and example fee would total $0.10 before tax. The fee is a test assumption. The simulator's existing EUR prices are separate fixtures.
+
+**Next integration check.** Record the accepted quote and attempt before submitting. BFL returns an ID and polling URL. Persist both, then resume that job on refresh and save the returned image with its receipt. If BFL might have accepted a request but the acknowledgement was lost, flag the attempt for reconciliation and avoid resubmitting it. Exercise both interruption cases with simulated HTTP responses before the first funded call. [BFL generation and polling guide](https://docs.bfl.ai/quick_start/generating_images)
+
 On 25 November 2026 the local simulation passed the production build and three automated checks, including a Chrome run that downloads the PNG and receipt and recovers the attempt after reload. The API checks cover concurrent acceptance, replay and invalid requests. The delivered slice uses the local SQLite store. Milestone 2 still requires a real model, provider job recovery and a clean-checkout review. Next, select one provider by reproducing a quote for the square packshot from its published rate.
 
 Keep the four milestones above as the public overview. Use [issue #1](https://github.com/EsquisseHQ/studio/issues/1) for prototype acceptance. Open a linked issue for each work item as it enters development, with a user action and an observable completion condition. Link the implementation PR and its test or demo from that issue. At each milestone review, record what someone actually reproduced, what is blocked, and the next item to start. Leave issue #1 open until a reviewer reproduces a real generation.
