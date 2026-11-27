@@ -1,0 +1,56 @@
+import { z } from 'zod'
+import { formats } from '../../../../lib/types'
+import { generate, imageFor, quoteFor, receiptFor, statusFor, StudioError } from '../../../../lib/server'
+
+export const runtime = 'nodejs'
+type Context = { params: Promise<{ action: string }> }
+const error = (message: string, status: number) => Response.json({ error: message }, { status })
+export async function POST(request: Request, context: Context) {
+  const { action } = await context.params
+  const origin = request.headers.get('origin')
+  const host = request.headers.get('host') || ''
+  const localHost = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host)
+  const sameOrigin = origin === 'https://' + host
+  const publicOrigin = process.env.ESQUISSE_PUBLIC_ORIGIN
+  const allowed = localHost ? !origin || sameOrigin || origin === 'http://' + host
+    : sameOrigin && (origin === publicOrigin || (publicOrigin && host === process.env.RENDER_EXTERNAL_HOSTNAME))
+  if (!allowed)
+    return error('Unexpected request origin.', 403)
+  if (request.headers.get('content-type')?.split(';')[0] !== 'application/json') return error('JSON required.', 415)
+  try {
+    const data = await request.json()
+    if (action === 'quote') {
+      const model = z.enum(['demo', 'flux']).default('demo').parse(data?.model)
+      return Response.json({ ...quoteFor(z.enum(formats).parse(data?.format), model),
+        ...(publicOrigin ? { publicDemo: true } : {}),
+        ...(model === 'flux' && (publicOrigin || !process.env.BFL_API_KEY) ? { missingKey: true } : {}) })
+    }
+    if (action === 'status') return Response.json(await statusFor(z.uuid().parse(data?.quoteId)))
+    if (action !== 'generate') return error('Unknown action.', 404)
+    const input = z.object({ quoteId: z.uuid(), prompt: z.string().trim().min(1).max(2000) }).parse(data)
+    return Response.json(await generate(input.quoteId, input.prompt))
+  } catch (err) {
+    if (err instanceof StudioError) return error(err.message, err.status)
+    if (err instanceof z.ZodError || err instanceof SyntaxError) return error('Check the format and prompt.', 400)
+    return error('Generation interrupted. Check its status before trying again.', 500)
+  }
+}
+export async function GET(request: Request, context: Context) {
+  const { action } = await context.params
+  const query = new URL(request.url).searchParams
+  const id = query.get('id')
+  if (!id || !z.uuid().safeParse(id).success) return error('Invalid ID.', 400)
+  const headers = new Headers({ 'Cache-Control': 'no-store' })
+  if (action === 'image') {
+    const image = imageFor(id)
+    if (!image) return error('Image not found.', 404)
+    headers.set('Content-Type', 'image/png')
+    if (query.has('download')) headers.set('Content-Disposition', `attachment; filename="esquisse-${id}.png"`)
+    return new Response(new Uint8Array(image), { headers })
+  }
+  if (action !== 'receipt') return error('Unknown action.', 404)
+  const receipt = receiptFor(id)
+  if (!receipt) return error('Attempt not found.', 404)
+  if (query.has('download')) headers.set('Content-Disposition', `attachment; filename="receipt-${id}.json"`)
+  return Response.json(receipt, { headers })
+}

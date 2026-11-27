@@ -1,0 +1,83 @@
+.home {
+  max-width: 1720px;
+  margin: auto;
+  padding: 10px var(--gutter) clamp(44px,6vw,96px);
+}
+.home-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: clamp(550px, calc(93svh - 74px), 900px);
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  border-radius: clamp(18px,2vw,34px);
+  border: 1px solid #302a35;
+  background:
+    radial-gradient(ellipse at 93% -14%,#33283d 0%,transparent 46%),
+    radial-gradient(ellipse at 0% 100%,#24192d 0%,transparent 42%),#09090b;
+}
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  transform: translateY(-18%);
+  max-width: 900px;
+  padding: 0 14px;
+  text-align: center;
+}
+.hero-copy h1 { font-size: clamp(54px,6.4vw,104px); line-height: .96; letter-spacing: -.07em; font-weight: 520; color: #faf9fb }
+.hero-copy h1 span { color: #d4cfd9 }
+.hero-copy p { margin: 22px auto; font-size: clamp(14px,1.2vw,18px); color: #c1bbc6; text-wrap: balance }
+.hero-open {
+  display: inline-flex; align-items: center; gap: 16px; padding: 12px 21px;
+  border-radius: 30px; background: #f3edf7; color: #17101b; font-size: 14px; font-weight: 650;
+  box-shadow: 0 0 0 1px #ffffff42,0 6px 22px #0006;
+}
+.hero-open:hover { background: #e3c6f5; text-decoration: none }
+.glass-form {
+  position: absolute; pointer-events: none; top: 68%; left: 50%; transform: translateX(-50%);
+  width: clamp(700px,90%,1560px); aspect-ratio: 1600/570;
+}
+.glass-form img { display: block; width: 100%; height: 100% }
+.glass-form::after {
+  content: ''; position: absolute; inset: 0;
+  mask: url('/esquisse-glass.webp') center / 100% 100% no-repeat;
+  background: linear-gradient(105deg,transparent 28%,#ab6dff08 43%,#ab83ff35 49%,#aa72ff09 54%,transparent 65%) 0% 50% / 210% 100%;
+  mix-blend-mode: screen; animation: glass-reflection 14s ease-in-out infinite alternate;
+}
+@keyframes glass-reflection { to { background-position: 100% 50% } }
+@media (prefers-reduced-motion:reduce) { .glass-form::after { animation: none; background-position: 50% 50% } }
+.studio-shelf { padding-top: clamp(32px,5vw,74px) }
+.home-section-head,.quote-head,.quote-foot { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px }
+.home-section-head { margin-bottom: 18px }
+.home-section-head h2 { font-weight: 520; font-size: clamp(27px,3vw,48px); letter-spacing: -.055em }
+.home-studios { display: grid; grid-template-columns: 1.22fr 1fr 1fr; gap: clamp(10px,1.4vw,23px) }
+.home-studios article { min-width: 0 }
+.studio-cover {
+  position: relative; display: block; height: clamp(210px,23vw,355px); isolation: isolate;
+  overflow: hidden; background: #171518; color: white; border-radius: 13px;
+}
+.studio-cover img { position: absolute; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease }
+.studio-cover:hover img { transform: scale(1.035) }
+.studio-cover::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 42%,#0b080ecc 100%) }
+.cover-label { position: absolute; bottom: 16px; left: 20px; display: grid; gap: 2px }
+.cover-label small { color: #e4dce9; font-size: 12px }.cover-label strong { font-size: clamp(25px,3vw,44px); font-weight: 520; line-height: 1; letter-spacing: -.055em }
+.sample-quote { scroll-margin-top: 100px; margin-top: 12px; padding: 18px 20px; border: 1px solid #353036; border-radius: 12px; background: #131214 }
+.quote-head h3 { font-size: 17px; font-weight: 600; letter-spacing: -.03em }
+.quote-head small,.quote-foot small { color: var(--muted); font-size: 12px }
+.sample-quote dl { margin: 9px 0; padding: 0; font-size: 14px; font-variant-numeric: tabular-nums }
+.sample-quote dd { white-space: nowrap }
+.quote-total { border-top: 1px solid #3c333f; margin-top: 5px; font-weight: 650 }
+.quote-total dt { color: #f4edf9 }
+.quote-foot a { color: #d9bcea; font-size: 12px }
+@media(max-width:720px) {
+  .home { padding-top: 6px }
+  .home-hero { height: clamp(440px,75svh,640px) }
+  .hero-copy h1 { font-size: clamp(43px,10vw,70px) }
+  .hero-copy p { max-width: 29ch }
+  .glass-form { top: 74%; min-width: 0; width: 150% }
+  .home-studios { grid-template-columns: 1fr; gap: 22px }
+  .studio-cover { height: auto; aspect-ratio: 1.85 }
+  .sample-quote { padding: 15px }
+}
