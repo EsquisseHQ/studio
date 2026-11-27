@@ -19,7 +19,7 @@ For interactive changes, `pnpm dev` starts the local studio. The simulator runs 
 
 | Change | Start here |
 | --- | --- |
-| Prompt, format picker, result actions | `app/page.tsx` and `app/studio.css` |
+| Prompt, format picker, result actions | `app/image/page.tsx` and `app/studio.css` |
 | Quote calculation, storage, replay | `lib/server.ts` |
 | Request validation and downloads | `app/api/studio/[action]/route.ts` |
 | Shared quote and receipt fields | `lib/types.ts` |

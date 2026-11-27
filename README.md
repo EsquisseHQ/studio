@@ -6,7 +6,7 @@ Esquisse is a cooperative, open-source studio in development for generating imag
 
 ## Project status
 
-The studio opens in a free simulation that varies the lighting and crop of a perfume photograph. The model menu also offers an optional FLUX 1.1 [pro] API trial. Successful attempts save a PNG and a JSON receipt linked to the accepted quote. [Roadmap](ROADMAP.md) · [Engineering stack](STACK.md) · [First real generation](https://github.com/EsquisseHQ/studio/issues/1).
+The home page explains the breakdown of generation costs. The Image studio opens in a free simulation that varies the lighting and crop of a perfume photograph. The model menu also offers an optional FLUX 1.1 [pro] API trial. Successful attempts save a PNG and a JSON receipt linked to the accepted quote. [Roadmap](ROADMAP.md) · [Engineering stack](STACK.md) · [First real generation](https://github.com/EsquisseHQ/studio/issues/1).
 
 ## Run the local studio
 

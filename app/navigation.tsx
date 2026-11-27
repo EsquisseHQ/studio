@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation'
 import { mediaNames, studies } from '../lib/catalog'
 
 const sections = [
-  ['/', 'Image'], ['/video', 'Vidéo'], ['/audio', 'Audio'], ['/models', 'Models'], ['/pricing', 'Pricing']
+  ['/', 'Accueil'], ['/image', 'Image'], ['/video', 'Vidéo'], ['/audio', 'Audio'], ['/models', 'Models'],
+  ['/pricing', 'Pricing'], ['/mcp', 'MCP']
 ] as const
 
 export function Navigation({imageMenu}: {imageMenu?: (close: () => void) => ReactNode}) {
@@ -31,7 +32,7 @@ export function Navigation({imageMenu}: {imageMenu?: (close: () => void) => Reac
     <nav aria-label="Navigation principale" ref={nav}>
       {sections.map(([href, label]) => {
         const active = href === path
-        const isImage = href === '/' && Boolean(imageMenu)
+        const isImage = href === '/image' && Boolean(imageMenu)
         const hasMenu = isImage || ['/video','/audio','/models'].includes(href)
         const medium = href === '/video' ? 'video' : 'audio'
         const expanded = menu === href

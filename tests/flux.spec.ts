@@ -9,7 +9,7 @@ async function countSubmissions(prompt: string) {
 
 test('a FLUX attempt survives a reload and a failed poll and downloads one image', async ({ page, request }) => {
   const prompt = 'Golden bottle in hard sunlight'
-  await page.goto('/')
+  await page.goto('/image')
   await page.getByLabel('Modèle', { exact: true }).selectOption('flux')
   await page.getByLabel('Description', { exact: true }).fill(prompt)
   await expect(page.getByLabel('Détail du prix')).toContainText('0,05')

@@ -1,5 +1,32 @@
 import { expect, test } from '@playwright/test'
 
+test('the home page explains the quote and opens the image studio', async ({page}) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', {name: 'Crée en sachant ce que tu paies.'})).toBeVisible()
+  await page.getByRole('link', {name: 'Voir un devis ↓'}).click()
+  await expect(page.locator('#devis')).toBeInViewport()
+  await expect(page.locator('#devis')).toContainText('Commission simulée')
+  await page.getByRole('link', {name: 'Ouvrir le studio ↗'}).click()
+  await expect(page.getByRole('heading', {name: 'Studio Image'})).toBeVisible()
+  await page.goto('/?model=flux')
+  await expect(page.getByLabel('Modèle', {exact:true})).toHaveValue('flux')
+})
+
+test('MCP and community follow pricing on desktop and mobile', async ({page}) => {
+  await page.goto('/pricing')
+  const nav = page.getByRole('navigation', {name: 'Navigation principale'})
+  for (const width of [1280, 768, 320]) {
+    await page.setViewportSize({width, height: 800})
+    const links = await nav.getByRole('link').allTextContents()
+    expect(links.slice(-3)).toEqual(['Pricing', 'MCP', 'Communauté ↗'])
+    await expect(nav.getByRole('link', {name: 'Communauté ↗'})).toBeInViewport({ratio: 1})
+    await expect(nav.getByRole('link', {name: 'Communauté ↗'})).toHaveAttribute('href', 'https://github.com/EsquisseHQ/studio/discussions')
+  }
+  await nav.getByRole('link', {name: 'MCP'}).click()
+  await expect(page.getByRole('heading', {name: 'Studio MCP'})).toBeVisible()
+  await expect(nav.getByRole('link', {name: 'MCP'})).toHaveAttribute('aria-current', 'page')
+})
+
 test('video and audio studies play and export on a small screen', async ({page}) => {
   await page.setViewportSize({width: 360, height: 800})
   await page.goto('/')

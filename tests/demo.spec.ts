@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 
 test('a creator can iterate, download the accepted quote and recover the rendered image', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/image')
   await page.getByLabel('Format', { exact: true }).selectOption('4:5')
   await page.getByLabel('Description', { exact: true }).fill('Flacon ambré au flash direct')
   await expect(page.getByLabel('Détail du prix')).toContainText('0,06')
@@ -32,7 +32,7 @@ test('a creator can iterate, download the accepted quote and recover the rendere
 
 test('the mobile Image menu opens tools and models and earlier renders stay in the gallery', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/')
+  await page.goto('/image')
   await page.getByRole('button', { name: 'Image', exact: true }).click()
   await page.getByRole('button', { name: /Explorer les exemples/ }).click()
   await page.getByRole('button', { name: 'Ouvrir Chrome liquide' }).click()
