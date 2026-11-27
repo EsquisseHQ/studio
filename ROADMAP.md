@@ -27,6 +27,8 @@ Start with a product photographer making a square packshot. Give them an editabl
 
 ### 27 November 2026 · First provider for the local trial
 
+The local studio now includes an opt-in FLUX 1.1 [pro] adapter. The local test suite covers delivery, reload, a lost submit acknowledgement and provider refusal with mocked HTTP. The first funded call and comparison to the actual BFL account debit remain open.
+
 The production build and all three simulator tests passed again. The prototype remains on the local `prototype/image-studio` branch. [Issue #1](https://github.com/EsquisseHQ/studio/issues/1) stays open until a reviewer downloads a real image and reconciles its receipt.
 
 Use Black Forest Labs' FLUX 1.1 [pro] for the first integration trial. The starting shot is one 1024 × 1024 text-to-image perfume packshot. Its fixed per-image rate makes the quote easy to check. BFL lists this as a previous-generation model, so the trial selects it for predictable billing and makes no claim about which model the wider catalog should feature. [Provider pricing](https://bfl.ai/pricing) · [Model API](https://docs.bfl.ai/flux_models/flux_1_1_pro)
