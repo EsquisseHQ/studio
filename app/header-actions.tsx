@@ -20,7 +20,7 @@ export function HeaderActions() {
   }
 
   return <div className="header-actions">
-    <a href="/pricing" className="upgrade-action">Upgrade <span aria-hidden="true">↗</span></a>
+    <a href="/pricing" className="upgrade-action">Upgrade</a>
     <a href="/image?view=mine" className="folder-action" aria-label="My renders" title="My renders">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v1H3zM3 12h18v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
     </a>

@@ -9,7 +9,7 @@ export function MediaStudio({medium, selected}: {medium: 'audio' | 'video'; sele
   const asset = '/media/'+active.id+'.'+ext
   const art = '/studies/'+active.art+'.webp'
   return <><Navigation/><main className="workspace">
-    <div className="page-head"><h1><em>{mediaNames[medium]}</em> Studio</h1><a className="quiet-link" href={'/models?media='+medium}>Catalog ↗</a></div>
+    <div className="page-head"><h1><em>{mediaNames[medium]}</em> Studio</h1><a className="quiet-link" href={'/models?media='+medium}>Catalog</a></div>
     <div className="media-layout">
       <section className="screen">
         {video ? <video key={asset} controls playsInline poster={art} preload="metadata" aria-label={'Play '+active.name} src={asset}/> :

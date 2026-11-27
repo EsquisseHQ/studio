@@ -53,7 +53,7 @@ export function ImageDetails({ item, close, reuse, running }: {
         {r && <dl><div><dt>Dimensions</dt><dd>{r.width} × {r.height}</dd></div>
           <div><dt>{r.simulated ? 'Simulated quote' : 'Estimate before tax'}</dt><dd>{money(r.quote.totalCents, r.quote.currency)}</dd></div>
           <div><dt>Collected by Esquisse</dt><dd>{money(r.chargedCents, r.quote.currency)}</dd></div></dl>}
-        <button className="primary-light" onClick={reuse} disabled={running}>{r ? 'Reuse settings' : 'Use this prompt'} ↗</button>
+        <button className="primary-light" onClick={reuse} disabled={running}>{r ? 'Reuse settings' : 'Use this prompt'}</button>
         {r && <div className="file-links"><a href={asset('image', r.id, true)} download>Download PNG ↓</a><a href={asset('receipt', r.id, true)} download>JSON receipt ↓</a></div>}
       </div>
     </div>

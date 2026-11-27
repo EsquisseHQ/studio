@@ -18,7 +18,7 @@ function Comparison() {
     {items.map((m,i) => <th key={i}><select aria-label={'Model '+(i+1)} value={m.id} onChange={e => (i === 0 ? setLeft : setRight)(e.target.value)}>
       {models.map(item => <option key={item.id} value={item.id} disabled={item.id === items[1-i].id}>{item.name}</option>)}</select></th>)}</tr></thead>
     <tbody>{fields.map((f,i) => <tr key={f}><th scope="row">{f}</th>{items.map(item => <td key={item.id}>{values(item)[i]}</td>)}</tr>)}
-    <tr><th scope="row">Studio</th>{items.map(item => <td key={item.id}><a className="quiet-link" href={item.href}>Open ↗</a></td>)}</tr></tbody></table></div>
+    <tr><th scope="row">Studio</th>{items.map(item => <td key={item.id}><a className="quiet-link" href={item.href}>Open</a></td>)}</tr></tbody></table></div>
 }
 export function Catalog({view, initialMedia}: {view:string; initialMedia:string}) {
   const [media, setMedia] = useState(initialMedia)
@@ -30,7 +30,7 @@ export function Catalog({view, initialMedia}: {view:string; initialMedia:string}
     {[['','All models'],['providers','Providers'],['compare','Compare']].map(([id,label]) => <a key={id} aria-current={current === id ? 'page' : undefined} href={id ? '/models?view='+id : '/models'}>{label}</a>)}</nav>
     {current === 'compare' ? <Comparison/> : current === 'providers' ?
       <div className="provider-list">{Array.from(new Set(models.map(m=>m.provider))).map(p => <section key={p}><h2>{p}</h2>
-        {models.filter(m=>m.provider===p).map(m=><a key={m.id} href={m.href}>{m.name}<small>{m.mode} ↗</small></a>)}</section>)}</div> :
+        {models.filter(m=>m.provider===p).map(m=><a key={m.id} href={m.href}>{m.name}<small>{m.mode}</small></a>)}</section>)}</div> :
       <><div className="catalog-tools"><div className="filters" role="group" aria-label="Media type">
         <button aria-pressed={!media || !(media in mediaNames)} onClick={()=>setMedia('')}>All</button>
         {(Object.keys(mediaNames) as Medium[]).map(key=><button key={key} aria-pressed={media===key} onClick={()=>setMedia(key)}>{mediaNames[key]}</button>)}</div>

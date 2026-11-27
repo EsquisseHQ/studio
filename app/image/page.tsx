@@ -154,8 +154,8 @@ export default function Studio() {
   return <>
     <Navigation imageMenu={close => <>
           <div className="menu-tiles">
-            <button onClick={() => { close(); input.current?.focus() }}><img src={examples[0].image} alt="" /><strong>Create an image ↗</strong></button>
-            <button onClick={() => { close(); navigate('examples') }}><img src={examples[1].image} alt="" /><strong>Browse examples ↗</strong></button>
+            <button onClick={() => { close(); input.current?.focus() }}><img src={examples[0].image} alt="" /><strong>Create an image</strong></button>
+            <button onClick={() => { close(); navigate('examples') }}><img src={examples[1].image} alt="" /><strong>Browse examples</strong></button>
           </div>
           <div className="menu-columns"><div><h2>Tools</h2>
             <button onClick={() => { close(); navigate('mine') }}>Render gallery</button>
@@ -178,7 +178,7 @@ export default function Studio() {
         {running && filter !== 'examples' && <div className="queue-tile" role="status"><i /><strong>Generating image</strong><span>{live ? 'FLUX 1.1 [pro]' : 'Esquisse Demo'}</span></div>}
         {cards.map(item => <GalleryCard key={item.id} item={item} open={() => setDetail(item)} />)}
       </section>
-      {!cards.length && !running && <div className="empty"><h2>Your first render will appear here.</h2><button onClick={() => input.current?.focus()}>Write a prompt ↗</button></div>}
+      {!cards.length && !running && <div className="empty"><h2>Your first render will appear here.</h2><button onClick={() => input.current?.focus()}>Write a prompt</button></div>}
     </main>
     <form className="dock" onSubmit={e => { e.preventDefault(); void run() }}>
       <div className="prompt-row"><span className="spark" aria-hidden="true">✧</span><textarea ref={input} id="prompt" aria-label="Description"
@@ -198,7 +198,7 @@ export default function Studio() {
             <small>{live ? 'Your BFL account pays for generation. Esquisse collects $0.00.' : 'This demo uses the perfume photograph. You won’t be charged.'}</small>
           </div></details>
         <button className="generate" disabled={!price || price.missingKey || running || !prompt.trim()}>
-          <span>{running ? 'Generating…' : 'Generate'}</span><b>{live ? fluxPrice : 'Free'}</b><span aria-hidden="true">↗</span>
+          <span>{running ? 'Generating…' : 'Generate'}</span><b>{live ? fluxPrice : 'Free'}</b>
         </button>
       </div>
       {error && <p className="notice" role="alert">{error} <button type="button" onClick={() => { setError(''); setQuote(undefined); setReload(n => n + 1) }}>Refresh quote</button></p>}

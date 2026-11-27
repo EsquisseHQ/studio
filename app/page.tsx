@@ -24,20 +24,19 @@ export default async function Home({searchParams}: {searchParams: Promise<{model
       <div className="hero-copy">
         <h1 id="home-title">Know the price<br /><span>before you create.</span></h1>
         <p>See the model cost and studio fee before you generate.</p>
-        <a className="hero-open" href="/image">Open Studio <span aria-hidden="true">↗</span></a>
+        <a className="hero-open" href="/image">Open Studio</a>
       </div>
       <div className="glass-form" aria-hidden="true"><img src="/esquisse-glass.webp" alt="" fetchPriority="high" /></div>
     </section>
 
     <section className="studio-shelf" aria-labelledby="studios-title">
       <div className="home-section-head"><h2 id="studios-title">Explore the studios</h2>
-        <a className="quiet-link" href="/models">Compare models ↗</a></div>
+        <a className="quiet-link" href="/models">Compare models</a></div>
       <div className="home-studios">{studios.map(s =>
         <article key={s.href}>
           <a className="studio-cover" href={s.href}>
             <img src={'/studies/' + s.image + '.webp'} alt="" loading="lazy" />
             <span className="cover-label"><small>{s.action}</small><strong>{s.name}</strong></span>
-            <span className="cover-arrow" aria-hidden="true">↗</span>
           </a>
           {s.href === '/image' && <section id="devis" className="sample-quote" aria-labelledby="quote-title">
             <div className="quote-head"><h3 id="quote-title">Sample quote</h3><small>FLUX 1.1 [pro] · 1 image</small></div>
@@ -46,7 +45,7 @@ export default async function Home({searchParams}: {searchParams: Promise<{model
               <div><dt>Simulated studio fee</dt><dd>{money(trialFeeCents, 'USD')}</dd></div>
               <div className="quote-total"><dt>Estimated total before tax</dt><dd>{money(fluxProviderCents + trialFeeCents, 'USD')}</dd></div>
             </dl>
-            <div className="quote-foot"><small>Esquisse collects {money(0, 'USD')} in this prototype.</small><a href="/pricing">Pricing ↗</a></div>
+            <div className="quote-foot"><small>Esquisse collects {money(0, 'USD')} in this prototype.</small><a href="/pricing">Pricing</a></div>
           </section>}
         </article>
       )}</div>

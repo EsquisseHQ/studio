@@ -38,22 +38,22 @@ export function Navigation({imageMenu}: {imageMenu?: (close: () => void) => Reac
         const medium = href === '/video' ? 'video' : 'audio'
         const expanded = menu === href
         return <div className={'nav-item' + (active ? ' selected' : '')} key={href}>
-          {!isImage && <a href={href} aria-current={active ? 'page' : undefined}>{label}</a>}
-          {hasMenu && <button className={isImage ? 'image-trigger' : 'sub-trigger'} aria-label={isImage ? 'Image' : label + ' menu'}
+          {!hasMenu && <a href={href} aria-current={active ? 'page' : undefined}>{label}</a>}
+          {hasMenu && <button type="button" aria-current={active ? 'page' : undefined}
             aria-expanded={expanded} aria-controls={expanded ? 'studio-menu' : undefined}
             onClick={e => {trigger.current = e.currentTarget; setMenu(expanded ? '' : href)}}>
-            {isImage && 'Image'}<span className="chevron" /></button>}
+            {label}</button>}
           {expanded && <section id="studio-menu" className={'image-menu' + (href === '/models' ? ' directory-menu' : '')} aria-label={label + ' menu'}>
             {isImage ? imageMenu?.(close) : href === '/models' ?
-              <><a href="/models">All models <span>{'↗'}</span></a><a href="/models?view=providers">Providers <span>↗</span></a><a href="/models?view=compare">Compare <span>↗</span></a></> :
+              <><a href="/models">All models</a><a href="/models?view=providers">Providers</a><a href="/models?view=compare">Compare</a></> :
               <><div className="menu-tiles media-tiles">{studies[medium].slice(0,2).map(s =>
-                <a key={s.id} href={href + '?study=' + s.id}><img src={'/studies/'+s.art+'.webp'} alt=""/><strong>{s.name} ↗</strong></a>)}</div>
+                <a key={s.id} href={href + '?study=' + s.id}><img src={'/studies/'+s.art+'.webp'} alt=""/><strong>{s.name}</strong></a>)}</div>
                 <div className="menu-columns media-columns"><div><h2>Tools</h2><a href={href}>{mediaNames[medium]} Studio</a><a href={href+'#export'}>{medium === 'video' ? 'Export a shot' : 'Export a loop'}</a></div>
-                  <div><h2>Catalog</h2><a href={'/models?media='+medium}>{medium === 'video' ? 'Video engines' : 'Audio engines'} ↗</a></div></div></>}
+                  <div><h2>Catalog</h2><a href={'/models?media='+medium}>{medium === 'video' ? 'Video engines' : 'Audio engines'}</a></div></div></>}
           </section>}
         </div>
       })}
-      <a className="community" href="https://github.com/EsquisseHQ/studio/discussions">Community ↗</a>
+      <a className="community" href="https://github.com/EsquisseHQ/studio/discussions">Community</a>
     </nav><HeaderActions />
   </div></header>
 }
