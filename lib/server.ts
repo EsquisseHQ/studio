@@ -71,7 +71,7 @@ export async function statusFor(id: string): Promise<Receipt | AttemptStatus> {
   if (attempt.state === 'review' || (attempt.state === 'submitting' && Date.now() - Number(attempt.started) > 30_000))
     return { id, state: 'review', message: uncertain }
   if (attempt.state === 'submitting') return pending(id, 'Submitting to Black Forest Labs…')
-  const key = process.env.BFL_API_KEY
+  const key = !process.env.ESQUISSE_PUBLIC_ORIGIN && process.env.BFL_API_KEY
   if (!key) throw new StudioError(503, 'Set your BFL key to resume this attempt.')
   const quote: Quote = JSON.parse(String(db().prepare('SELECT payload FROM quotes WHERE id = ?').get(id)!.payload))
   try {
@@ -106,7 +106,7 @@ export async function generate(id: string, prompt: string) {
   }
   if (Date.parse(quote.expiresAt) <= Date.now()) throw new StudioError(410, 'This quote has expired. Refresh it to get a new price.')
   if (quote.rate === fluxRate) {
-    const key = process.env.BFL_API_KEY
+    const key = !process.env.ESQUISSE_PUBLIC_ORIGIN && process.env.BFL_API_KEY
     if (!key) throw new StudioError(503, 'Set BFL_API_KEY in .env.local and restart the studio.')
     const claim = db().prepare("INSERT OR IGNORE INTO flux_attempts (id,prompt,started,state) VALUES (?,?,?,'submitting')")
       .run(id, prompt, Date.now())

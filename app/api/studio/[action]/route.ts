@@ -9,8 +9,12 @@ export async function POST(request: Request, context: Context) {
   const { action } = await context.params
   const origin = request.headers.get('origin')
   const host = request.headers.get('host') || ''
-  if (!/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host) ||
-      (origin && origin !== 'http://' + host && origin !== 'https://' + host))
+  const localHost = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host)
+  const sameOrigin = origin === 'https://' + host
+  const publicOrigin = process.env.ESQUISSE_PUBLIC_ORIGIN
+  const allowed = localHost ? !origin || sameOrigin || origin === 'http://' + host
+    : sameOrigin && (origin === publicOrigin || (publicOrigin && host === process.env.RENDER_EXTERNAL_HOSTNAME))
+  if (!allowed)
     return error('Unexpected request origin.', 403)
   if (request.headers.get('content-type')?.split(';')[0] !== 'application/json') return error('JSON required.', 415)
   try {
@@ -18,7 +22,8 @@ export async function POST(request: Request, context: Context) {
     if (action === 'quote') {
       const model = z.enum(['demo', 'flux']).default('demo').parse(data?.model)
       return Response.json({ ...quoteFor(z.enum(formats).parse(data?.format), model),
-        ...(model === 'flux' && !process.env.BFL_API_KEY ? { missingKey: true } : {}) })
+        ...(publicOrigin ? { publicDemo: true } : {}),
+        ...(model === 'flux' && (publicOrigin || !process.env.BFL_API_KEY) ? { missingKey: true } : {}) })
     }
     if (action === 'status') return Response.json(await statusFor(z.uuid().parse(data?.quoteId)))
     if (action !== 'generate') return error('Unknown action.', 404)

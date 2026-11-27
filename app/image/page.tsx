@@ -7,6 +7,7 @@ import { fluxPrice } from '../../lib/catalog'
 import { examples, GalleryCard, ImageDetails, renderItem, type GalleryItem } from '../gallery'
 
 const storageKey = 'esquisse.attempt.v1'
+type StudioQuote = Quote & { missingKey?: boolean; publicDemo?: boolean }
 type Saved = { quoteId: string; prompt: string; format: Format; model?: 'demo' | 'flux' }
 async function post<T>(action: string, data: unknown): Promise<T> {
   const res = await fetch('/api/studio/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
@@ -23,7 +24,7 @@ export default function Studio() {
   const [format, setFormat] = useState<Format>('1:1')
   const [model, setModel] = useState<'demo' | 'flux'>('demo')
   const live = model === 'flux'
-  const [quote, setQuote] = useState<Quote & { missingKey?: boolean }>()
+  const [quote, setQuote] = useState<StudioQuote>()
   const [history, setHistory] = useState<Receipt[]>([])
   const [filter, setFilter] = useState<Filter>('all')
   const [dense, setDense] = useState(false)
@@ -111,7 +112,7 @@ export default function Studio() {
     if (!ready) return
     let active = true
     setQuote(undefined)
-    post<Quote & { missingKey?: boolean }>('quote', { format, model }).then(q => { if (active) setQuote(q) })
+    post<StudioQuote>('quote', { format, model }).then(q => { if (active) setQuote(q) })
       .catch(() => { if (active) setError('The quote is unavailable. Refresh it to try again.') })
     return () => { active = false }
   }, [format, model, reload, ready])
@@ -204,7 +205,8 @@ export default function Studio() {
       {error && <p className="notice" role="alert">{error} <button type="button" onClick={() => { setError(''); setQuote(undefined); setReload(n => n + 1) }}>Refresh quote</button></p>}
       {progress && <p className="notice" role="status">{progress}</p>}
       {retryId && !running && <button type="button" className="notice" onClick={() => { setError(''); setTracked(retryId); setRetryId('') }}>Check last attempt</button>}
-      {price?.missingKey && <p className="notice">To use FLUX, set BFL_API_KEY in .env.local. You can use Esquisse Demo for free.</p>}
+      {price?.publicDemo && <p className="notice">{live ? 'Choose Esquisse Demo to generate a free image.' : 'Download your image and receipt to keep them. Demo files are temporary.'}</p>}
+      {price?.missingKey && !price.publicDemo && <p className="notice">To use FLUX, set BFL_API_KEY in .env.local. You can use Esquisse Demo for free.</p>}
     </form>
     {detail && <ImageDetails item={detail} close={() => setDetail(undefined)} running={running} reuse={() => {
       const r = detail.receipt
