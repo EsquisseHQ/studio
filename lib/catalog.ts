@@ -1,25 +1,27 @@
+import { money } from './types'
+
 export const fluxProviderCents = 4
 export const trialFeeCents = 1
-export const fluxPrice = (fluxProviderCents / 100).toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' USD'
-export const mediaNames = {image: 'Image', video: 'Vidéo', audio: 'Audio'} as const
+export const fluxPrice = money(fluxProviderCents, 'USD')
+export const mediaNames = {image: 'Image', video: 'Video', audio: 'Audio'} as const
 export type Medium = keyof typeof mediaNames
 
 export const models = [
-  {id: 'demo', name: 'Esquisse Démo', medium: 'image', provider: 'Esquisse', mode: 'Simulateur', description: 'Variations de lumière et de cadrage sur une photo de parfum.', output: 'PNG', unit: 'image', price: 'Gratuit', href: '/image?model=demo', art: '/atelier.webp'},
-  {id: 'flux', name: 'FLUX 1.1 [pro]', medium: 'image', provider: 'Black Forest Labs', mode: 'API · clé BFL', description: 'Génération d’une image carrée à partir d’un prompt.', output: 'PNG', unit: 'image', price: fluxPrice, href: '/image?model=flux', art: '/studies/portrait.webp'},
-  {id: 'motion', name: 'Études de mouvement', medium: 'video', provider: 'Esquisse', mode: 'Études locales', description: 'Plans de caméra précomposés à explorer et exporter.', output: 'MP4', unit: 'plan', price: 'Gratuit', href: '/video', art: '/studies/coupe.webp'},
-  {id: 'sound', name: 'Études sonores', medium: 'audio', provider: 'Esquisse', mode: 'Études locales', description: 'Boucles de synthétiseur à écouter et télécharger.', output: 'WAV', unit: 'boucle', price: 'Gratuit', href: '/audio', art: '/studies/chrome.webp'}
+  {id: 'demo', name: 'Esquisse Demo', medium: 'image', provider: 'Esquisse', mode: 'Simulator', description: 'Explore lighting and framing variations on a perfume photograph.', output: 'PNG', unit: 'image', price: 'Free', href: '/image?model=demo', art: '/atelier.webp'},
+  {id: 'flux', name: 'FLUX 1.1 [pro]', medium: 'image', provider: 'Black Forest Labs', mode: 'API · BFL key', description: 'Generate a square image from a text prompt.', output: 'PNG', unit: 'image', price: fluxPrice, href: '/image?model=flux', art: '/studies/portrait.webp'},
+  {id: 'motion', name: 'Motion Studies', medium: 'video', provider: 'Esquisse', mode: 'Local studies', description: 'Preview and export precomposed camera shots.', output: 'MP4', unit: 'shot', price: 'Free', href: '/video', art: '/studies/coupe.webp'},
+  {id: 'sound', name: 'Sound Studies', medium: 'audio', provider: 'Esquisse', mode: 'Local studies', description: 'Listen to synth loops and download them as WAV files.', output: 'WAV', unit: 'loop', price: 'Free', href: '/audio', art: '/studies/chrome.webp'}
 ] as const
 export type CatalogEntry = typeof models[number]
 export const studies = {
   video: [
-    {id:'coupe', name:'Dernier virage', detail:'Travelling latéral', art:'coupe'},
-    {id:'concrete', name:'Ligne de fuite', detail:'Zoom avant', art:'concrete'},
-    {id:'wave', name:'À fleur d’eau', detail:'Zoom arrière', art:'wave'}
+    {id:'coupe', name:'Final Turn', detail:'Tracking shot', art:'coupe'},
+    {id:'concrete', name:'Vanishing Point', detail:'Zoom in', art:'concrete'},
+    {id:'wave', name:'At Water Level', detail:'Zoom out', art:'wave'}
   ],
   audio: [
-    {id:'pulse', name:'Minuit analogique', detail:'Pulsation · 120 BPM', art:'chrome'},
-    {id:'glass', name:'Verre dépoli', detail:'Carillon · 90 BPM', art:'iris'},
-    {id:'tide', name:'Marée lente', detail:'Nappe · 60 BPM', art:'wave'}
+    {id:'pulse', name:'Analog Midnight', detail:'Pulse · 120 BPM', art:'chrome'},
+    {id:'glass', name:'Frosted Glass', detail:'Chimes · 90 BPM', art:'iris'},
+    {id:'tide', name:'Slow Tide', detail:'Ambient pad · 60 BPM', art:'wave'}
   ]
 } as const

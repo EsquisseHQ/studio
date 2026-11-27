@@ -25,4 +25,4 @@ For interactive changes, `pnpm dev` starts the local studio. The simulator runs 
 | Shared quote and receipt fields | `lib/types.ts` |
 | Browser flow and duplicate-request checks | `tests/demo.spec.ts` |
 
-For pricing changes, verify the receipt against the accepted server quote. Replaying an accepted request must return the same job. For UI changes, check the creator-facing interaction in French. Describe any untested behavior in the PR so the maintainer can reproduce it.
+For pricing changes, verify the receipt against the accepted server quote. Replaying an accepted request must return the same job. For UI changes, check the creator-facing interaction in English. Describe any untested behavior in the PR so the maintainer can reproduce it.

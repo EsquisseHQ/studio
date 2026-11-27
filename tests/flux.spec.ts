@@ -10,14 +10,14 @@ async function countSubmissions(prompt: string) {
 test('a FLUX attempt survives a reload and a failed poll and downloads one image', async ({ page, request }) => {
   const prompt = 'Golden bottle in hard sunlight'
   await page.goto('/image')
-  await page.getByLabel('Modèle', { exact: true }).selectOption('flux')
+  await page.getByLabel('Model', { exact: true }).selectOption('flux')
   await page.getByLabel('Description', { exact: true }).fill(prompt)
-  await expect(page.getByLabel('Détail du prix')).toContainText('0,05')
+  await expect(page.getByLabel('Price breakdown')).toContainText('0.05')
   const accepted = page.waitForResponse(res => res.url().endsWith('/generate') && res.ok())
-  await page.getByRole('button', { name: /Générer/ }).click()
+  await page.getByRole('button', { name: /Generate/ }).click()
   const { id } = await (await accepted).json()
   await page.reload()
-  await expect(page.getByRole('link', { name: 'Télécharger le PNG' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Download PNG' })).toBeVisible()
   const receipt: Receipt = await (await request.get('/api/studio/receipt?id=' + id)).json()
   expect(receipt.quote).toMatchObject({ id, currency: 'USD', providerCents: 4, studioCents: 1, totalCents: 5 })
   expect(receipt).toMatchObject({ prompt, simulated: false, chargedCents: 0, width: 1024, height: 1024 })
